@@ -861,12 +861,12 @@
         };
 
         const TOTAL_WIDTH_DXA = 10800;
-        // Exact column grid: [Sl.No, Description, HSN, Qty, Rate, Amount]
-        const colWidths = [700, 4300, 900, 1100, 1400, 2400]; // Total = 10800 DXA
-        const leftWidth = colWidths[0] + colWidths[1] + colWidths[2]; // 5900 DXA
-        const rightCol1Width = colWidths[3] + colWidths[4]; // 2500 DXA
-        const rightCol2Width = colWidths[5]; // 2400 DXA
-        const rightFullWidth = colWidths[3] + colWidths[4] + colWidths[5]; // 4900 DXA
+        // Exact column grid matching CSS: [Sl.No (7%), Description (48%), HSN (9%), Qty (11%), Rate (12%), Amount (13%)]
+        const colWidths = [756, 5184, 972, 1188, 1296, 1404]; // Total = 10800 DXA
+        const leftWidth = colWidths[0] + colWidths[1]; // 5940 DXA (55% Left section over Sl.No + Description)
+        const rightCol1Width = colWidths[2] + colWidths[3]; // 2160 DXA (above HSN + Qty)
+        const rightCol2Width = colWidths[4] + colWidths[5]; // 2700 DXA (above Rate + Amount)
+        const rightFullWidth = colWidths[2] + colWidths[3] + colWidths[4] + colWidths[5]; // 4860 DXA (45% Right section)
 
         const masterTableRows = [];
 
@@ -875,7 +875,7 @@
             new TableRow({
                 children: [
                     new TableCell({
-                        columnSpan: 3,
+                        columnSpan: 2,
                         verticalMerge: VMerge.RESTART,
                         width: { size: leftWidth, type: WidthType.DXA },
                         borders: cellBorders,
@@ -896,7 +896,7 @@
                         ]
                     }),
                     new TableCell({
-                        columnSpan: 1,
+                        columnSpan: 2,
                         width: { size: rightCol2Width, type: WidthType.DXA },
                         borders: cellBorders,
                         children: [
@@ -912,7 +912,7 @@
             new TableRow({
                 children: [
                     new TableCell({
-                        columnSpan: 3,
+                        columnSpan: 2,
                         verticalMerge: VMerge.CONTINUE,
                         width: { size: leftWidth, type: WidthType.DXA },
                         borders: cellBorders,
@@ -927,7 +927,7 @@
                         ]
                     }),
                     new TableCell({
-                        columnSpan: 1,
+                        columnSpan: 2,
                         width: { size: rightCol2Width, type: WidthType.DXA },
                         borders: cellBorders,
                         children: [
@@ -943,7 +943,7 @@
             new TableRow({
                 children: [
                     new TableCell({
-                        columnSpan: 3,
+                        columnSpan: 2,
                         verticalMerge: VMerge.CONTINUE,
                         width: { size: leftWidth, type: WidthType.DXA },
                         borders: cellBorders,
@@ -958,7 +958,7 @@
                         ]
                     }),
                     new TableCell({
-                        columnSpan: 1,
+                        columnSpan: 2,
                         width: { size: rightCol2Width, type: WidthType.DXA },
                         borders: cellBorders,
                         children: [
@@ -974,7 +974,7 @@
             new TableRow({
                 children: [
                     new TableCell({
-                        columnSpan: 3,
+                        columnSpan: 2,
                         verticalMerge: VMerge.RESTART,
                         width: { size: leftWidth, type: WidthType.DXA },
                         borders: cellBorders,
@@ -995,7 +995,7 @@
                         ]
                     }),
                     new TableCell({
-                        columnSpan: 1,
+                        columnSpan: 2,
                         width: { size: rightCol2Width, type: WidthType.DXA },
                         borders: cellBorders,
                         children: [
@@ -1011,7 +1011,7 @@
             new TableRow({
                 children: [
                     new TableCell({
-                        columnSpan: 3,
+                        columnSpan: 2,
                         verticalMerge: VMerge.CONTINUE,
                         width: { size: leftWidth, type: WidthType.DXA },
                         borders: cellBorders,
@@ -1026,7 +1026,7 @@
                         ]
                     }),
                     new TableCell({
-                        columnSpan: 1,
+                        columnSpan: 2,
                         width: { size: rightCol2Width, type: WidthType.DXA },
                         borders: cellBorders,
                         children: [
@@ -1042,7 +1042,7 @@
             new TableRow({
                 children: [
                     new TableCell({
-                        columnSpan: 3,
+                        columnSpan: 2,
                         verticalMerge: VMerge.CONTINUE,
                         width: { size: leftWidth, type: WidthType.DXA },
                         borders: cellBorders,
@@ -1057,7 +1057,7 @@
                         ]
                     }),
                     new TableCell({
-                        columnSpan: 1,
+                        columnSpan: 2,
                         width: { size: rightCol2Width, type: WidthType.DXA },
                         borders: cellBorders,
                         children: [
@@ -1073,14 +1073,14 @@
             new TableRow({
                 children: [
                     new TableCell({
-                        columnSpan: 3,
+                        columnSpan: 2,
                         verticalMerge: VMerge.CONTINUE,
                         width: { size: leftWidth, type: WidthType.DXA },
                         borders: cellBorders,
                         children: []
                     }),
                     new TableCell({
-                        columnSpan: 3,
+                        columnSpan: 4,
                         width: { size: rightFullWidth, type: WidthType.DXA },
                         borders: cellBorders,
                         children: [
@@ -1195,7 +1195,7 @@
                 height: { value: 1600, rule: HRule.AT_LEAST },
                 children: [
                     new TableCell({
-                        columnSpan: 3,
+                        columnSpan: 2,
                         width: { size: leftWidth, type: WidthType.DXA },
                         borders: cellBorders,
                         children: [
@@ -1205,7 +1205,7 @@
                         ]
                     }),
                     new TableCell({
-                        columnSpan: 3,
+                        columnSpan: 4,
                         width: { size: rightFullWidth, type: WidthType.DXA },
                         borders: cellBorders,
                         children: [

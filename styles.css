@@ -443,7 +443,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 }
 
 .header-left-cell {
-    width: 50%;
+    width: 55%;
     border-right: 1px solid #000000;
     padding: 8px 10px;
     display: flex;
@@ -495,21 +495,28 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 
 /* Right Metadata Table */
 .header-right-cell {
-    width: 50%;
+    width: 45%;
 }
 .meta-subtable {
     width: 100%;
     border-collapse: collapse;
-    font-size: 9pt;
+    font-size: 8.5pt;
+    table-layout: fixed;
 }
 .meta-subtable td {
     border-bottom: 1px solid #000000;
     border-right: 1px solid #000000;
-    padding: 4px 6px;
+    padding: 3px 5px;
     vertical-align: top;
-    line-height: 1.25;
+    line-height: 1.2;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+.meta-subtable td:first-child {
+    width: 44.44%;
 }
 .meta-subtable td:last-child {
+    width: 55.56%;
     border-right: none;
 }
 .meta-subtable tr:last-child td {
@@ -592,7 +599,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     border-top: 1px solid #000000;
 }
 .remarks-cell {
-    width: 50%;
+    width: 55%;
     border-right: 1px solid #000000;
     padding: 6px 8px;
     font-size: 9pt;
@@ -611,7 +618,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 }
 
 .bank-cell {
-    width: 50%;
+    width: 45%;
     padding: 6px 8px;
     font-size: 9pt;
     line-height: 1.3;
