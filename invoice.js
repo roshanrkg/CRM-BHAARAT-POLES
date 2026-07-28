@@ -1,13 +1,13 @@
 /**
- * SAH ENTERPRISE - Quotation Generator Application Logic
- * Pure Client-Side JavaScript (Zero Backend Required)
+ * SAH ENTERPRISE - Tax Invoice Generator Engine (invoice.js)
+ * Standalone logic for Tax Invoice creation, live preview rendering, and export operations.
  */
 
-(function () {
-    'use strict';
-
-    // Application State Object
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // Application State Object for Tax Invoice
     const state = {
+        docType: 'invoice',
         sellerName: 'SAH ENTERPRISE',
         sellerAddr1: 'Holding no. 303, R.K. Roy Road Vivekananda Pally,',
         sellerAddr2: 'Ismile. Asansol- 713301',
@@ -15,22 +15,24 @@
         sellerPhone: '9832713026/9064441273',
         sellerEmail: 'bhaarat.poles@gmail.com',
 
-        invoiceNo: 'QN-23/26-27',
-        invoiceDate: '26/07/2026',
+        invoiceNo: 'SE-04/26-27',
+        invoiceDate: '11/06/2026',
         deliveryNote: '',
-        modeOfPayment: '',
+        modeOfPayment: 'Online',
         buyerOrderNo: '',
         buyerOrderDate: '',
         dispatchDocNo: '',
         dispatchDocDate: '',
-        dispatchThrough: 'Roadways/Logistics',
-        destination: 'Dhanbad, Jharkhand.',
+        dispatchThrough: 'Roadways',
+        destination: 'Maa Kalyaneshwari Mandir, Maithon.',
+        vehicleNo: 'WB 37C 1216',
         termsOfDelivery: '',
         
-        buyerName: 'Samay Homes Pvt. Ltd.',
-        buyerAddress1: 'Beside Zudio showroom, Adityapur',
-        buyerAddress2: 'Kandra Main Road, Jamshedpur.',
-        buyerStatePin: 'Jharkhand- 831013',
+        buyerName: 'SIRAJUDDIN ANSARI',
+        buyerAddress1: 'NA, Gopalpur, Benagorai',
+        buyerAddress2: 'Nirsa, Dhanbad',
+        buyerStatePin: 'Jharkhand- 828205',
+        buyerGst: '20AGQPA2464E1ZX',
         
         taxMode: 'igst18', // igst18 | cgst_sgst9 | exempt | custom
         customTaxRate: 18,
@@ -40,68 +42,63 @@
             {
                 id: 1,
                 sl: 1,
-                desc: '3m Designer Garden Light Pole. J-Shaped Double arm with base plate measuring 200x200x8mm. Bottom pipe dia: 4.5inch and 1m long, Top pipe dia: 3inch and 2m long. Thickness 2.5mm. Black and golden coloured arms and flowers welded in the J section.',
+                desc: '5 mtr MS garden pole, single arm.',
                 hsn: '7308',
-                qtyNum: 6,
+                qtyNum: 10,
                 unit: 'pcs',
-                rate: 4800
-            },
-            {
-                id: 2,
-                sl: 2,
-                desc: 'M16 Foundation Bolts (Set of 4)',
-                hsn: '7318',
-                qtyNum: 6,
-                unit: 'sets',
-                rate: 580
+                rate: 4900
             }
         ],
         
-        remark1: '50% payment as advance and 100% payment before material dispatch.',
-        remark2: 'Transportation as per actual. Borne by the buyer.',
+        remark1: '50% for booking and 100% payment before material dispatch.',
+        remark2: 'Transportation will be done by us and the fare will be borne by the buyer.',
         
-        bankName: 'Punjab National Bank.',
+        bankName: 'Punjab National Bank',
         bankAccount: '1397202100001251',
         bankBranchIfsc: 'SB Gorai Road Branch',
-        bankIfscCode: 'PUNB0139720'
+        bankIfscCode: 'PUNB0139720',
+
+        showStamp: 'yes',
+        sigTitle: 'Authorized Signatory',
+        sigDesignation: 'Proprietor'
     };
 
     // Preset Catalog Database
     const PRESETS = {
         preset_1: {
-            desc: '3m Designer Garden Light Pole. J-Shaped Double arm with base plate measuring 200x200x8mm. Bottom pipe dia: 4.5inch and 1m long, Top pipe dia: 3inch and 2m long. Thickness 2.5mm. Black and golden coloured arms and flowers welded in the J section.',
+            desc: '5 mtr MS garden pole, single arm.',
+            hsn: '7308',
+            qtyNum: 10,
+            unit: 'pcs',
+            rate: 4900
+        },
+        preset_2: {
+            desc: '3m Designer Garden Light Pole. J-Shaped Double arm with base plate measuring 200x200x8mm. Bottom pipe dia: 4.5inch and 1m long, Top pipe dia: 3inch and 2m long. Thickness 2.5mm.',
             hsn: '7308',
             qtyNum: 6,
             unit: 'pcs',
             rate: 4800
         },
-        preset_2: {
+        preset_3: {
             desc: 'M16 Foundation Bolts (Set of 4)',
             hsn: '7318',
             qtyNum: 6,
             unit: 'sets',
             rate: 580
         },
-        preset_3: {
+        preset_4: {
             desc: '6m Octagonal Steel Pole with Base Plate (200x200x12mm), Top Dia 70mm, Bottom Dia 130mm, 3mm Thickness.',
             hsn: '7308',
             qtyNum: 10,
             unit: 'pcs',
             rate: 9500
         },
-        preset_4: {
+        preset_5: {
             desc: '9m Swaged Tubular Steel Pole (SP-33 Type) with Base Plate measuring 300x300x16mm.',
             hsn: '7308',
             qtyNum: 5,
             unit: 'pcs',
             rate: 12800
-        },
-        preset_5: {
-            desc: 'LED Street Light Single Arm Pipe Bracket (50mm Dia, 1.5m Length) with Mounting Clamp Set.',
-            hsn: '7308',
-            qtyNum: 10,
-            unit: 'pcs',
-            rate: 1450
         }
     };
 
@@ -124,12 +121,14 @@
         dispatchDocDate: document.getElementById('dispatchDocDate'),
         dispatchThrough: document.getElementById('dispatchThrough'),
         destination: document.getElementById('destination'),
+        vehicleNo: document.getElementById('vehicleNo'),
         termsOfDelivery: document.getElementById('termsOfDelivery'),
         
         buyerName: document.getElementById('buyerName'),
         buyerAddress1: document.getElementById('buyerAddress1'),
         buyerAddress2: document.getElementById('buyerAddress2'),
         buyerStatePin: document.getElementById('buyerStatePin'),
+        buyerGst: document.getElementById('buyerGst'),
         
         itemsContainer: document.getElementById('itemsContainer'),
         btnAddItem: document.getElementById('btnAddItem'),
@@ -140,6 +139,10 @@
         customTaxRow: document.getElementById('customTaxRow'),
         customTaxRate: document.getElementById('customTaxRate'),
         transportationFee: document.getElementById('transportationFee'),
+
+        selectShowStamp: document.getElementById('selectShowStamp'),
+        sigTitle: document.getElementById('sigTitle'),
+        sigDesignation: document.getElementById('sigDesignation'),
         
         remark1: document.getElementById('remark1'),
         remark2: document.getElementById('remark2'),
@@ -149,6 +152,13 @@
         bankIfscCode: document.getElementById('bankIfscCode'),
         
         // View Target Elements
+        viewSellerName: document.getElementById('viewSellerName'),
+        viewSellerAddr1: document.getElementById('viewSellerAddr1'),
+        viewSellerAddr2: document.getElementById('viewSellerAddr2'),
+        viewGstNo: document.getElementById('viewGstNo'),
+        viewSellerPhone: document.getElementById('viewSellerPhone'),
+        viewSellerEmail: document.getElementById('viewSellerEmail'),
+
         viewInvoiceNo: document.getElementById('viewInvoiceNo'),
         viewInvoiceDate: document.getElementById('viewInvoiceDate'),
         viewDeliveryNote: document.getElementById('viewDeliveryNote'),
@@ -159,12 +169,17 @@
         viewDispatchDocDate: document.getElementById('viewDispatchDocDate'),
         viewDispatchThrough: document.getElementById('viewDispatchThrough'),
         viewDestination: document.getElementById('viewDestination'),
+        viewVehicleRow: document.getElementById('viewVehicleRow'),
+        viewVehicleNo: document.getElementById('viewVehicleNo'),
+        viewTermsRow: document.getElementById('viewTermsRow'),
         viewTermsOfDelivery: document.getElementById('viewTermsOfDelivery'),
         
         viewBuyerName: document.getElementById('viewBuyerName'),
         viewBuyerAddr1: document.getElementById('viewBuyerAddr1'),
         viewBuyerAddr2: document.getElementById('viewBuyerAddr2'),
         viewBuyerStatePin: document.getElementById('viewBuyerStatePin'),
+        viewBuyerGstBox: document.getElementById('viewBuyerGstBox'),
+        viewBuyerGstVal: document.getElementById('viewBuyerGstVal'),
         
         viewItemsTableBody: document.getElementById('viewItemsTableBody'),
         viewSubtotal: document.getElementById('viewSubtotal'),
@@ -184,163 +199,116 @@
         viewBankAccount: document.getElementById('viewBankAccount'),
         viewBankBranchIfsc: document.getElementById('viewBankBranchIfsc'),
         viewBankIfscCode: document.getElementById('viewBankIfscCode'),
+
+        viewStampContainer: document.getElementById('viewStampContainer'),
+        viewStampImage: document.getElementById('viewStampImage'),
+        viewSigCompany: document.getElementById('viewSigCompany'),
+        viewSigTitle: document.getElementById('viewSigTitle'),
+        viewSigDesignation: document.getElementById('viewSigDesignation'),
         
         // Top Action Buttons
         btnLoadSample: document.getElementById('btnLoadSample'),
         btnReset: document.getElementById('btnReset'),
         btnHistory: document.getElementById('btnHistory'),
-        historyCount: document.getElementById('historyCount'),
         btnPrintPdf: document.getElementById('btnPrintPdf'),
         btnExportDocx: document.getElementById('btnExportDocx'),
         
-        // Modal
+        // Mobile Navigation Tabs
+        tabEditor: document.getElementById('tabEditor'),
+        tabPreview: document.getElementById('tabPreview'),
+        sidebar: document.querySelector('.sidebar'),
+        previewViewport: document.querySelector('.preview-viewport'),
+
+        // Modal Elements
         historyModal: document.getElementById('historyModal'),
         btnCloseHistory: document.getElementById('btnCloseHistory'),
         btnClearHistory: document.getElementById('btnClearHistory'),
-        historyList: document.getElementById('historyList')
+        historyList: document.getElementById('historyList'),
+        historyCount: document.getElementById('historyCount')
     };
 
-    // Helper: Format Number as Indian Currency Rupees
-    function formatRupees(num) {
-        if (num === null || num === undefined || isNaN(num)) return '₹0.00';
-        return '₹' + Number(num).toLocaleString('en-IN', {
+    // Initialize Lucide Icons
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+
+    // Currency Formatting (Rupees INR)
+    function formatRupees(amount) {
+        return '₹' + Number(amount).toLocaleString('en-IN', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
     }
 
-    // Helper: Indian Currency Number to Words Converter
-    function numberToWordsINR(amount) {
-        const num = Math.floor(Math.abs(Number(amount) || 0));
+    // Number to Words Converter for Indian Rupees
+    function numberToWordsINR(num) {
         if (num === 0) return 'Rupees Zero Only.';
+        
+        const a = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 
+                   'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+        const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
 
-        const units = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 
-                       'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
-        const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-
-        function convertGroup(n) {
-            let str = '';
-            if (n >= 100) {
-                str += units[Math.floor(n / 100)] + ' Hundred ';
-                n %= 100;
-            }
-            if (n >= 20) {
-                str += tens[Math.floor(n / 10)] + ' ';
-                n %= 10;
-            }
-            if (n > 0) {
-                str += units[n] + ' ';
-            }
-            return str;
+        function inWords(n) {
+            if (n < 20) return a[n];
+            if (n < 100) return b[Math.floor(n / 10)] + (n % 10 !== 0 ? ' ' + a[n % 10] : '');
+            if (n < 1000) return a[Math.floor(n / 100)] + ' Hundred' + (n % 100 !== 0 ? ' and ' + inWords(n % 100) : '');
+            if (n < 100000) return inWords(Math.floor(n / 1000)) + ' Thousand' + (n % 1000 !== 0 ? ' ' + inWords(n % 1000) : '');
+            if (n < 10000000) return inWords(Math.floor(n / 100000)) + ' Lakh' + (n % 100000 !== 0 ? ' ' + inWords(n % 100000) : '');
+            return inWords(Math.floor(n / 10000000)) + ' Crore' + (n % 10000000 !== 0 ? ' ' + inWords(n % 10000000) : '');
         }
 
-        let words = '';
-        const crore = Math.floor(num / 10000000);
-        let rem = num % 10000000;
-        const lakh = Math.floor(rem / 100000);
-        rem %= 100000;
-        const thousand = Math.floor(rem / 1000);
-        rem %= 1000;
+        const integerPart = Math.floor(num);
+        const decimalPart = Math.round((num - integerPart) * 100);
 
-        if (crore > 0) words += convertGroup(crore) + 'Crore ';
-        if (lakh > 0) words += convertGroup(lakh) + 'Lakh ';
-        if (thousand > 0) words += convertGroup(thousand) + 'Thousand ';
-        if (rem > 0) words += convertGroup(rem);
-
-        words = words.trim();
-        // Capitalize words properly
-        return 'Rupees ' + words + ' Only.';
-    }
-
-    // Initialize App & Event Listeners
-    function init() {
-        bindFormInputs();
-        renderItemsEditor();
-        updateView();
-        updateHistoryCount();
-        initMobileTabs();
-        lucide.createIcons();
-        const sidebar = document.querySelector('.sidebar');
-        if (sidebar) sidebar.scrollTop = 0;
-    }
-
-    // Mobile View Tab Switcher Logic
-    function initMobileTabs() {
-        const tabEditor = document.getElementById('tabEditor');
-        const tabPreview = document.getElementById('tabPreview');
-        const sidebar = document.querySelector('.sidebar');
-        const previewViewport = document.querySelector('.preview-viewport');
-
-        if (!tabEditor || !tabPreview || !sidebar || !previewViewport) return;
-
-        tabEditor.addEventListener('click', () => {
-            tabEditor.classList.add('active');
-            tabPreview.classList.remove('active');
-            sidebar.style.display = 'flex';
-            previewViewport.style.display = 'none';
-        });
-
-        tabPreview.addEventListener('click', () => {
-            tabPreview.classList.add('active');
-            tabEditor.classList.remove('active');
-            sidebar.style.display = 'none';
-            previewViewport.style.display = 'flex';
-            setTimeout(updateMobileScale, 50);
-        });
-
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 900) {
-                sidebar.style.display = '';
-                previewViewport.style.display = '';
-            } else {
-                if (tabEditor.classList.contains('active')) {
-                    sidebar.style.display = 'flex';
-                    previewViewport.style.display = 'none';
-                } else {
-                    sidebar.style.display = 'none';
-                    previewViewport.style.display = 'flex';
-                }
-            }
-            updateMobileScale();
-        });
-
-        // Trigger initial responsive check
-        if (window.innerWidth <= 900) {
-            sidebar.style.display = 'flex';
-            previewViewport.style.display = 'none';
+        let result = 'Rupees ' + inWords(integerPart);
+        if (decimalPart > 0) {
+            result += ' and ' + inWords(decimalPart) + ' Paise';
         }
-        updateMobileScale();
+        return result + ' Only.';
     }
 
-    // Dynamic Mobile Preview Sheet Scaling Engine
+    // Mobile Dynamic Scaling Helper
     function updateMobileScale() {
         const wrapper = document.querySelector('.sheet-wrapper');
-        const viewport = document.querySelector('.preview-viewport');
-        if (!wrapper || !viewport) return;
+        const sheet = document.getElementById('quotationSheet');
+        if (!wrapper || !sheet) return;
 
-        if (window.innerWidth <= 900 && previewViewport.offsetWidth > 0) {
-            wrapper.style.transform = 'none';
-            const availableWidth = viewport.clientWidth - 24;
-            const sheetWidth = wrapper.offsetWidth || 794;
-
-            if (availableWidth < sheetWidth && availableWidth > 200) {
-                const scale = availableWidth / sheetWidth;
-                wrapper.style.transform = `scale(${scale})`;
-                wrapper.style.transformOrigin = 'top left';
-                wrapper.style.marginBottom = `-${(1 - scale) * wrapper.offsetHeight}px`;
-                wrapper.style.marginRight = `-${(1 - scale) * sheetWidth}px`;
+        if (window.innerWidth <= 1024) {
+            const containerWidth = wrapper.clientWidth - 20;
+            const sheetWidth = 794;
+            if (containerWidth < sheetWidth) {
+                const scale = containerWidth / sheetWidth;
+                sheet.style.transform = `scale(${scale})`;
+                sheet.style.transformOrigin = 'top left';
+                wrapper.style.height = `${sheet.offsetHeight * scale + 20}px`;
             } else {
-                wrapper.style.transform = '';
-                wrapper.style.transformOrigin = '';
-                wrapper.style.marginBottom = '';
-                wrapper.style.marginRight = '';
+                sheet.style.transform = 'none';
+                wrapper.style.height = 'auto';
             }
         } else {
-            wrapper.style.transform = '';
-            wrapper.style.transformOrigin = '';
-            wrapper.style.marginBottom = '';
-            wrapper.style.marginRight = '';
+            sheet.style.transform = 'none';
+            wrapper.style.height = 'auto';
         }
+    }
+
+    window.addEventListener('resize', updateMobileScale);
+
+    // Mobile Navigation Tab Switcher
+    if (el.tabEditor && el.tabPreview) {
+        el.tabEditor.addEventListener('click', () => {
+            el.tabEditor.classList.add('active');
+            el.tabPreview.classList.remove('active');
+            el.sidebar.classList.remove('active-tab');
+            el.previewViewport.classList.remove('active-tab');
+        });
+
+        el.tabPreview.addEventListener('click', () => {
+            el.tabPreview.classList.add('active');
+            el.tabEditor.classList.remove('active');
+            el.sidebar.classList.add('active-tab');
+            el.previewViewport.classList.add('active-tab');
+            setTimeout(updateMobileScale, 50);
+        });
     }
 
     // Date formatting helper (YYYY-MM-DD -> DD/MM/YYYY)
@@ -383,15 +351,19 @@
             ['dispatchDocNo', 'viewDispatchDocNo'],
             ['dispatchThrough', 'viewDispatchThrough'],
             ['destination', 'viewDestination'],
+            ['vehicleNo', 'viewVehicleNo'],
             ['termsOfDelivery', 'viewTermsOfDelivery'],
             ['buyerName', 'viewBuyerName'],
             ['buyerAddress1', 'viewBuyerAddr1'],
             ['buyerAddress2', 'viewBuyerAddr2'],
             ['buyerStatePin', 'viewBuyerStatePin'],
+            ['buyerGst', 'viewBuyerGstVal'],
             ['bankName', 'viewBankName'],
             ['bankAccount', 'viewBankAccount'],
             ['bankBranchIfsc', 'viewBankBranchIfsc'],
-            ['bankIfscCode', 'viewBankIfscCode']
+            ['bankIfscCode', 'viewBankIfscCode'],
+            ['sigTitle', 'viewSigTitle'],
+            ['sigDesignation', 'viewSigDesignation']
         ];
 
         fieldMap.forEach(([inputId, viewId]) => {
@@ -399,11 +371,22 @@
                 el[inputId].addEventListener('input', (e) => {
                     state[inputId] = e.target.value;
                     if (el[viewId]) el[viewId].textContent = e.target.value;
+                    if (inputId === 'buyerGst' || inputId === 'vehicleNo') {
+                        updateView();
+                    }
                 });
             }
         });
 
-        // Specific Date Picker Field Bindings (invoiceDate, buyerOrderDate, dispatchDocDate)
+        // Stamp toggle listener
+        if (el.selectShowStamp) {
+            el.selectShowStamp.addEventListener('change', (e) => {
+                state.showStamp = e.target.value;
+                updateView();
+            });
+        }
+
+        // Specific Date Picker Field Bindings
         const dateFields = [
             ['invoiceDate', 'viewInvoiceDate'],
             ['buyerOrderDate', 'viewBuyerOrderDate'],
@@ -412,7 +395,6 @@
 
         dateFields.forEach(([inputId, viewId]) => {
             if (el[inputId]) {
-                // Pre-populate input value
                 el[inputId].value = formatDatePickerVal(state[inputId]);
 
                 const handleDateChange = (e) => {
@@ -627,6 +609,40 @@
 
     // Update Live Printable Sheet View
     function updateView() {
+        // Buyer GST Display
+        if (el.viewBuyerGstBox) {
+            if (state.buyerGst && state.buyerGst.trim() !== '') {
+                el.viewBuyerGstBox.style.display = 'block';
+                if (el.viewBuyerGstVal) el.viewBuyerGstVal.textContent = state.buyerGst;
+            } else {
+                el.viewBuyerGstBox.style.display = 'none';
+            }
+        }
+
+        // Vehicle Number Display
+        if (el.viewVehicleRow) {
+            if (state.vehicleNo && state.vehicleNo.trim() !== '') {
+                el.viewVehicleRow.style.display = 'table-row';
+                if (el.viewVehicleNo) el.viewVehicleNo.textContent = state.vehicleNo;
+            } else {
+                el.viewVehicleRow.style.display = 'none';
+            }
+        }
+
+        // Signature Stamp Overlay Display
+        if (el.viewStampContainer) {
+            if (state.showStamp === 'yes') {
+                el.viewStampContainer.style.display = 'block';
+            } else {
+                el.viewStampContainer.style.display = 'none';
+            }
+        }
+
+        // Signatory details
+        if (el.viewSigCompany) el.viewSigCompany.textContent = 'For Sah Enterprise';
+        if (el.viewSigTitle) el.viewSigTitle.textContent = state.sigTitle || 'Authorized Signatory';
+        if (el.viewSigDesignation) el.viewSigDesignation.textContent = state.sigDesignation || 'Proprietor';
+
         // Render Line Items Table Body
         el.viewItemsTableBody.innerHTML = '';
         let subtotal = 0;
@@ -740,44 +756,39 @@
             .replace(/'/g, "&#039;");
     }
 
-    // Load Sample Data (matching Quotation.docx sample)
+    // Load Sample Data (Matching reference PDF B4C637CA.pdf)
     function loadSampleData() {
-        state.invoiceNo = 'QN-23/26-27';
-        state.invoiceDate = '26/07/2026';
+        state.invoiceNo = 'SE-04/26-27';
+        state.invoiceDate = '11/06/2026';
         state.deliveryNote = '';
-        state.modeOfPayment = '';
+        state.modeOfPayment = 'Online';
         state.buyerOrderNo = '';
         state.buyerOrderDate = '';
         state.dispatchDocNo = '';
         state.dispatchDocDate = '';
-        state.dispatchThrough = 'Roadways/Logistics';
-        state.destination = 'Dhanbad, Jharkhand.';
+        state.dispatchThrough = 'Roadways';
+        state.destination = 'Maa Kalyaneshwari Mandir, Maithon.';
+        state.vehicleNo = 'WB 37C 1216';
         state.termsOfDelivery = '';
         
-        state.buyerName = 'Samay Homes Pvt. Ltd.';
-        state.buyerAddress1 = 'Beside Zudio showroom, Adityapur';
-        state.buyerAddress2 = 'Kandra Main Road, Jamshedpur.';
-        state.buyerStatePin = 'Jharkhand- 831013';
+        state.buyerName = 'SIRAJUDDIN ANSARI';
+        state.buyerAddress1 = 'NA, Gopalpur, Benagorai';
+        state.buyerAddress2 = 'Nirsa, Dhanbad';
+        state.buyerStatePin = 'Jharkhand- 828205';
+        state.buyerGst = '20AGQPA2464E1ZX';
         
         state.taxMode = 'igst18';
+        state.remark1 = '50% for booking and 100% payment before material dispatch.';
+        state.remark2 = 'Transportation will be done by us and the fare will be borne by the buyer.';
         state.items = [
             {
                 id: 1,
                 sl: 1,
-                desc: '3m Designer Garden Light Pole. J-Shaped Double arm with base plate measuring 200x200x8mm. Bottom pipe dia: 4.5inch and 1m long, Top pipe dia: 3inch and 2m long. Thickness 2.5mm. Black and golden coloured arms and flowers welded in the J section.',
+                desc: '5 mtr MS garden pole, single arm.',
                 hsn: '7308',
-                qtyNum: 6,
+                qtyNum: 10,
                 unit: 'pcs',
-                rate: 4800
-            },
-            {
-                id: 2,
-                sl: 2,
-                desc: 'M16 Foundation Bolts (Set of 4)',
-                hsn: '7318',
-                qtyNum: 6,
-                unit: 'sets',
-                rate: 580
+                rate: 4900
             }
         ];
 
@@ -792,12 +803,16 @@
         el.dispatchDocDate.value = formatDatePickerVal(state.dispatchDocDate);
         el.dispatchThrough.value = state.dispatchThrough;
         el.destination.value = state.destination;
+        if (el.vehicleNo) el.vehicleNo.value = state.vehicleNo;
         el.termsOfDelivery.value = state.termsOfDelivery;
 
         el.buyerName.value = state.buyerName;
         el.buyerAddress1.value = state.buyerAddress1;
         el.buyerAddress2.value = state.buyerAddress2;
         el.buyerStatePin.value = state.buyerStatePin;
+        if (el.buyerGst) el.buyerGst.value = state.buyerGst;
+        if (el.remark1) el.remark1.value = state.remark1;
+        if (el.remark2) el.remark2.value = state.remark2;
 
         el.taxMode.value = state.taxMode;
         el.customTaxRow.classList.add('hidden');
@@ -823,11 +838,15 @@
         state.buyerAddress1 = '';
         state.buyerAddress2 = '';
         state.buyerStatePin = '';
+        state.buyerGst = '';
+        state.vehicleNo = '';
         
         el.buyerName.value = '';
         el.buyerAddress1.value = '';
         el.buyerAddress2.value = '';
         el.buyerStatePin.value = '';
+        if (el.buyerGst) el.buyerGst.value = '';
+        if (el.vehicleNo) el.vehicleNo.value = '';
         el.viewBuyerName.textContent = '';
         el.viewBuyerAddr1.textContent = '';
         el.viewBuyerAddr2.textContent = '';
@@ -885,16 +904,15 @@
         };
 
         const TOTAL_WIDTH_DXA = 10800;
-        // Exact column grid matching CSS: [Sl.No (7%), Description (48%), HSN (9%), Qty (11%), Rate (12%), Amount (13%)]
-        const colWidths = [756, 5184, 972, 1188, 1296, 1404]; // Total = 10800 DXA
-        const leftWidth = colWidths[0] + colWidths[1]; // 5940 DXA (55% Left section over Sl.No + Description)
-        const rightCol1Width = colWidths[2] + colWidths[3]; // 2160 DXA (above HSN + Qty)
-        const rightCol2Width = colWidths[4] + colWidths[5]; // 2700 DXA (above Rate + Amount)
-        const rightFullWidth = colWidths[2] + colWidths[3] + colWidths[4] + colWidths[5]; // 4860 DXA (45% Right section)
+        const colWidths = [756, 5184, 821, 1511, 1124, 1404]; // Total = 10800 DXA
+        const leftWidth = colWidths[0] + colWidths[1];
+        const rightCol1Width = colWidths[2] + colWidths[3];
+        const rightCol2Width = colWidths[4] + colWidths[5];
+        const rightFullWidth = colWidths[2] + colWidths[3] + colWidths[4] + colWidths[5];
 
         const masterTableRows = [];
 
-        // --- ROW 0: Seller Info (Merged vertical restart) | Invoice No | Date ---
+        // --- ROW 0: Seller Info | Invoice No | Date ---
         masterTableRows.push(
             new TableRow({
                 children: [
@@ -931,7 +949,7 @@
             })
         );
 
-        // --- ROW 1: Seller Info (Vertical continue) | Delivery Note | Mode of Payment ---
+        // --- ROW 1: Seller Info | Delivery Note | Mode of Payment ---
         masterTableRows.push(
             new TableRow({
                 children: [
@@ -962,7 +980,7 @@
             })
         );
 
-        // --- ROW 2: Seller Info (Vertical continue) | Phone no | Email ---
+        // --- ROW 2: Seller Info | Phone no | Email ---
         masterTableRows.push(
             new TableRow({
                 children: [
@@ -993,7 +1011,21 @@
             })
         );
 
-        // --- ROW 3: Buyer Details (Vertical restart) | Buyer's Order No | Dated ---
+        // --- ROW 3: Buyer Details | Buyer's Order No | Dated ---
+        const buyerCellChildren = [
+            new Paragraph({ children: [new TextRun({ text: "Buyer Details:", size: 18 })] }),
+            new Paragraph({ children: [new TextRun({ text: state.buyerName, bold: true, size: 20 })] }),
+            new Paragraph({ children: [new TextRun({ text: state.buyerAddress1, size: 18 })] }),
+            new Paragraph({ children: [new TextRun({ text: state.buyerAddress2, size: 18 })] }),
+            new Paragraph({ children: [new TextRun({ text: state.buyerStatePin, size: 18 })] })
+        ];
+
+        if (state.buyerGst && state.buyerGst.trim() !== '') {
+            buyerCellChildren.push(
+                new Paragraph({ children: [new TextRun({ text: `GST NO. ${state.buyerGst}`, bold: true, size: 18 })] })
+            );
+        }
+
         masterTableRows.push(
             new TableRow({
                 children: [
@@ -1002,13 +1034,7 @@
                         verticalMerge: VMerge.RESTART,
                         width: { size: leftWidth, type: WidthType.DXA },
                         borders: cellBorders,
-                        children: [
-                            new Paragraph({ children: [new TextRun({ text: "Buyer Details:", size: 18 })] }),
-                            new Paragraph({ children: [new TextRun({ text: state.buyerName, bold: true, size: 20 })] }),
-                            new Paragraph({ children: [new TextRun({ text: state.buyerAddress1, size: 18 })] }),
-                            new Paragraph({ children: [new TextRun({ text: state.buyerAddress2, size: 18 })] }),
-                            new Paragraph({ children: [new TextRun({ text: state.buyerStatePin, size: 18 })] })
-                        ]
+                        children: buyerCellChildren
                     }),
                     new TableCell({
                         columnSpan: 2,
@@ -1030,7 +1056,7 @@
             })
         );
 
-        // --- ROW 4: Buyer Details (Vertical continue) | Dispatch Doc No | Dated ---
+        // --- ROW 4: Buyer Details | Dispatch Doc No | Dated ---
         masterTableRows.push(
             new TableRow({
                 children: [
@@ -1061,7 +1087,7 @@
             })
         );
 
-        // --- ROW 5: Buyer Details (Vertical continue) | Dispatch through | Destination ---
+        // --- ROW 5: Buyer Details | Dispatch through | Destination ---
         masterTableRows.push(
             new TableRow({
                 children: [
@@ -1092,7 +1118,32 @@
             })
         );
 
-        // --- ROW 6: Buyer Details (Vertical continue) | Terms of delivery ---
+        // --- ROW 6: Vehicle Number row ---
+        if (state.vehicleNo && state.vehicleNo.trim() !== '') {
+            masterTableRows.push(
+                new TableRow({
+                    children: [
+                        new TableCell({
+                            columnSpan: 2,
+                            verticalMerge: VMerge.CONTINUE,
+                            width: { size: leftWidth, type: WidthType.DXA },
+                            borders: cellBorders,
+                            children: []
+                        }),
+                        new TableCell({
+                            columnSpan: 4,
+                            width: { size: rightFullWidth, type: WidthType.DXA },
+                            borders: cellBorders,
+                            children: [
+                                new Paragraph({ children: [new TextRun({ text: "Vehicle Number: ", bold: true, size: 18 }), new TextRun({ text: state.vehicleNo || "-", size: 18 })] })
+                            ]
+                        })
+                    ]
+                })
+            );
+        }
+
+        // --- ROW 7: Terms of delivery ---
         masterTableRows.push(
             new TableRow({
                 children: [
@@ -1115,7 +1166,7 @@
             })
         );
 
-        // --- ROW 7: Items Header Row ---
+        // --- ROW 8: Items Header Row ---
         masterTableRows.push(
             new TableRow({
                 children: [
@@ -1129,7 +1180,7 @@
             })
         );
 
-        // --- ROW 8..N: Item Detail Rows (with minimum height so table fills the page) ---
+        // --- ROW 9..N: Item Detail Rows ---
         const itemMinHeight = state.items.length <= 2 ? 3200 : 1800;
 
         state.items.forEach((item, idx) => {
@@ -1149,7 +1200,7 @@
             );
         });
 
-        const span5Width = colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + colWidths[4]; // 8400 DXA
+        const span5Width = colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + colWidths[4];
 
         // Total Row
         masterTableRows.push(
@@ -1212,7 +1263,7 @@
             })
         );
 
-        // Amount in Words Row (Spans all 6 cols)
+        // Amount in Words Row
         masterTableRows.push(
             new TableRow({
                 children: [
@@ -1228,7 +1279,7 @@
             })
         );
 
-        // Footer Row (Remarks Left / Bank Details Right) - Spans 3 cols each
+        // Footer Row (Remarks Left / Bank Details Right)
         masterTableRows.push(
             new TableRow({
                 height: { value: 1600, rule: HRule.AT_LEAST },
@@ -1259,7 +1310,7 @@
             })
         );
 
-        // Signature Section Row (Inside Master Table matching original Quotation.docx)
+        // Signature Section Row
         masterTableRows.push(
             new TableRow({
                 height: { value: 1800, rule: HRule.AT_LEAST },
@@ -1273,8 +1324,8 @@
                             new Paragraph({ children: [new TextRun({ text: "For Sah Enterprise", bold: true, size: 18 })], alignment: AlignmentType.RIGHT }),
                             new Paragraph({ text: "" }),
                             new Paragraph({ text: "" }),
-                            new Paragraph({ children: [new TextRun({ text: "Authorized Signatory", italic: true, size: 18 })], alignment: AlignmentType.RIGHT }),
-                            new Paragraph({ children: [new TextRun({ text: "E. & O.E", italic: true, size: 16 })], alignment: AlignmentType.RIGHT })
+                            new Paragraph({ children: [new TextRun({ text: state.sigTitle || "Authorized Signatory", italic: true, size: 18 })], alignment: AlignmentType.RIGHT }),
+                            new Paragraph({ children: [new TextRun({ text: state.sigDesignation || "Proprietor", bold: true, size: 18 })], alignment: AlignmentType.RIGHT })
                         ]
                     })
                 ]
@@ -1303,7 +1354,7 @@
                     },
                     children: [
                         new Paragraph({
-                            children: [new TextRun({ text: "QUOTATION", bold: true, underline: {}, size: 28 })],
+                            children: [new TextRun({ text: "TAX INVOICE", bold: true, underline: {}, size: 28 })],
                             alignment: AlignmentType.CENTER
                         }),
                         new Paragraph({ text: "" }),
@@ -1314,7 +1365,7 @@
         });
 
         Packer.toBlob(doc).then(blob => {
-            saveAs(blob, `Quotation_${state.invoiceNo.replace(/[/\\?%*:|"<>]/g, '-')}.docx`);
+            saveAs(blob, `TaxInvoice_${state.invoiceNo.replace(/[/\\?%*:|"<>]/g, '-')}.docx`);
         }).catch(err => {
             console.error('Docx Export Error:', err);
             alert('Failed to generate Word document.');
@@ -1322,9 +1373,11 @@
     }
 
     // Local Storage History Management
+    const STORAGE_KEY = 'sah_tax_invoice_history';
+
     function getHistory() {
         try {
-            return JSON.parse(localStorage.getItem('sah_quotations') || '[]');
+            return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
         } catch (e) {
             return [];
         }
@@ -1332,33 +1385,63 @@
 
     function saveToHistory() {
         const history = getHistory();
-        const existingIndex = history.findIndex(h => h.invoiceNo === state.invoiceNo);
-        const snapshot = {
+        const record = {
             id: Date.now(),
             invoiceNo: state.invoiceNo,
-            date: state.invoiceDate,
             buyerName: state.buyerName,
+            date: state.invoiceDate,
             timestamp: new Date().toLocaleString(),
-            state: JSON.parse(JSON.stringify(state))
+            stateData: JSON.parse(JSON.stringify(state))
         };
-
-        if (existingIndex >= 0) {
-            history[existingIndex] = snapshot;
+        const existingIdx = history.findIndex(h => h.invoiceNo === state.invoiceNo && state.invoiceNo !== '');
+        if (existingIdx >= 0) {
+            history[existingIdx] = record;
         } else {
-            history.unshift(snapshot);
+            history.unshift(record);
         }
-
-        localStorage.setItem('sah_quotations', JSON.stringify(history));
-        updateHistoryCount();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(0, 30)));
+        updateHistoryBadge();
     }
 
-    function updateHistoryCount() {
-        const history = getHistory();
-        el.historyCount.textContent = history.length;
+    function updateHistoryBadge() {
+        const count = getHistory().length;
+        if (el.historyCount) el.historyCount.textContent = count;
     }
 
     function openHistoryModal() {
-        renderHistoryList();
+        const history = getHistory();
+        el.historyList.innerHTML = '';
+
+        if (history.length === 0) {
+            el.historyList.innerHTML = '<p class="text-muted">No saved Tax Invoices found in history.</p>';
+        } else {
+            history.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <div>
+                        <strong>${escapeHtml(item.invoiceNo || 'Untitled Invoice')}</strong> - ${escapeHtml(item.buyerName || 'Unknown Buyer')}
+                        <br><small style="color:#64748b">${item.date || ''} (${item.timestamp})</small>
+                    </div>
+                    <button class="btn btn-secondary btn-load-history" data-id="${item.id}">Load Draft</button>
+                `;
+                el.historyList.appendChild(div);
+            });
+
+            el.historyList.querySelectorAll('.btn-load-history').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = Number(e.currentTarget.dataset.id);
+                    const targetRecord = history.find(h => h.id === id);
+                    if (targetRecord && targetRecord.stateData) {
+                        Object.assign(state, targetRecord.stateData);
+                        populateFormFromState();
+                        updateView();
+                        closeHistoryModal();
+                    }
+                });
+            });
+        }
+
         el.historyModal.classList.remove('hidden');
     }
 
@@ -1366,59 +1449,60 @@
         el.historyModal.classList.add('hidden');
     }
 
-    function renderHistoryList() {
-        const history = getHistory();
-        if (history.length === 0) {
-            el.historyList.innerHTML = '<p class="text-muted">No saved quotations found.</p>';
-            return;
-        }
-
-        el.historyList.innerHTML = '';
-        history.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'history-item';
-            div.innerHTML = `
-                <div class="history-info">
-                    <h4>${escapeHtml(item.invoiceNo)} - ${escapeHtml(item.buyerName || 'Unnamed Buyer')}</h4>
-                    <p>Saved on: ${item.timestamp}</p>
-                </div>
-                <button class="btn btn-outline btn-load-history" data-id="${item.id}">Load</button>
-            `;
-            el.historyList.appendChild(div);
-        });
-
-        el.historyList.querySelectorAll('.btn-load-history').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = Number(e.currentTarget.dataset.id);
-                const target = history.find(h => h.id === id);
-                if (target && target.state) {
-                    Object.assign(state, target.state);
-                    
-                    // Update input fields
-                    el.invoiceNo.value = state.invoiceNo;
-                    el.invoiceDate.value = state.invoiceDate;
-                    el.buyerName.value = state.buyerName;
-                    el.buyerAddress1.value = state.buyerAddress1;
-                    el.buyerAddress2.value = state.buyerAddress2;
-                    el.buyerStatePin.value = state.buyerStatePin;
-                    el.taxMode.value = state.taxMode;
-
-                    renderItemsEditor();
-                    updateView();
-                    closeHistoryModal();
-                }
-            });
-        });
-    }
-
     function clearHistory() {
-        if (!confirm('Clear all saved history?')) return;
-        localStorage.removeItem('sah_quotations');
-        updateHistoryCount();
-        renderHistoryList();
+        if (confirm('Are you sure you want to clear all saved invoice history?')) {
+            localStorage.removeItem(STORAGE_KEY);
+            updateHistoryBadge();
+            openHistoryModal();
+        }
     }
 
-    // Run Initialization when DOM is Ready
-    document.addEventListener('DOMContentLoaded', init);
+    function populateFormFromState() {
+        if (el.sellerName) el.sellerName.value = state.sellerName;
+        if (el.sellerAddr1) el.sellerAddr1.value = state.sellerAddr1;
+        if (el.sellerAddr2) el.sellerAddr2.value = state.sellerAddr2;
+        if (el.sellerGst) el.sellerGst.value = state.sellerGst;
+        if (el.sellerPhone) el.sellerPhone.value = state.sellerPhone;
+        if (el.sellerEmail) el.sellerEmail.value = state.sellerEmail;
 
-})();
+        if (el.invoiceNo) el.invoiceNo.value = state.invoiceNo;
+        if (el.invoiceDate) el.invoiceDate.value = formatDatePickerVal(state.invoiceDate);
+        if (el.deliveryNote) el.deliveryNote.value = state.deliveryNote;
+        if (el.modeOfPayment) el.modeOfPayment.value = state.modeOfPayment;
+        if (el.buyerOrderNo) el.buyerOrderNo.value = state.buyerOrderNo;
+        if (el.buyerOrderDate) el.buyerOrderDate.value = formatDatePickerVal(state.buyerOrderDate);
+        if (el.dispatchDocNo) el.dispatchDocNo.value = state.dispatchDocNo;
+        if (el.dispatchDocDate) el.dispatchDocDate.value = formatDatePickerVal(state.dispatchDocDate);
+        if (el.dispatchThrough) el.dispatchThrough.value = state.dispatchThrough;
+        if (el.destination) el.destination.value = state.destination;
+        if (el.vehicleNo) el.vehicleNo.value = state.vehicleNo;
+        if (el.termsOfDelivery) el.termsOfDelivery.value = state.termsOfDelivery;
+
+        if (el.buyerName) el.buyerName.value = state.buyerName;
+        if (el.buyerAddress1) el.buyerAddress1.value = state.buyerAddress1;
+        if (el.buyerAddress2) el.buyerAddress2.value = state.buyerAddress2;
+        if (el.buyerStatePin) el.buyerStatePin.value = state.buyerStatePin;
+        if (el.buyerGst) el.buyerGst.value = state.buyerGst;
+
+        if (el.taxMode) el.taxMode.value = state.taxMode;
+        if (el.remark1) el.remark1.value = state.remark1;
+        if (el.remark2) el.remark2.value = state.remark2;
+        if (el.bankName) el.bankName.value = state.bankName;
+        if (el.bankAccount) el.bankAccount.value = state.bankAccount;
+        if (el.bankBranchIfsc) el.bankBranchIfsc.value = state.bankBranchIfsc;
+        if (el.bankIfscCode) el.bankIfscCode.value = state.bankIfscCode;
+
+        if (el.selectShowStamp) el.selectShowStamp.value = state.showStamp;
+        if (el.sigTitle) el.sigTitle.value = state.sigTitle;
+        if (el.sigDesignation) el.sigDesignation.value = state.sigDesignation;
+
+        renderItemsEditor();
+    }
+
+    // Initialize Application
+    bindFormInputs();
+    populateFormFromState();
+    updateView();
+    updateHistoryBadge();
+
+});

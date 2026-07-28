@@ -438,17 +438,19 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 
 /* Top Header Grid Row (Split Left/Right) */
 .header-grid-row {
-    display: flex;
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse;
     border-bottom: 1px solid #000000;
 }
 
 .header-left-cell {
+    display: table-cell;
     width: 55%;
+    vertical-align: top;
     border-right: 1px solid #000000;
     padding: 8px 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
 }
 
 .company-brand {
@@ -495,7 +497,9 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 
 /* Right Metadata Table */
 .header-right-cell {
+    display: table-cell;
     width: 45%;
+    vertical-align: top;
 }
 .meta-subtable {
     width: 100%;
@@ -513,10 +517,10 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     overflow-wrap: break-word;
 }
 .meta-subtable td:first-child {
-    width: 44.44%;
+    width: 48%;
 }
 .meta-subtable td:last-child {
-    width: 55.56%;
+    width: 52%;
     border-right: none;
 }
 .meta-subtable tr:last-child td {
@@ -524,9 +528,13 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 }
 .meta-highlight {
     font-weight: bold;
+    font-size: 8pt;
+    white-space: nowrap;
 }
 .meta-email {
     font-weight: bold;
+    font-size: 8pt;
+    word-break: break-all;
 }
 
 /* Main Items Table */
@@ -534,6 +542,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     width: 100%;
     border-collapse: collapse;
     font-size: 9.5pt;
+    table-layout: fixed;
 }
 
 .items-table th {
@@ -557,12 +566,12 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     border-right: none;
 }
 
-/* Exact Column Width Allocations */
+/* Exact Column Width Allocations for Vertical Grid Parity */
 .col-sl { width: 7%; text-align: center; }
 .col-desc { width: 48%; text-align: left; }
-.col-hsn { width: 9%; text-align: center; }
-.col-qty { width: 11%; text-align: center; }
-.col-rate { width: 12%; text-align: right; }
+.col-hsn { width: 7.6%; text-align: center; }
+.col-qty { width: 14%; text-align: center; }
+.col-rate { width: 10.4%; text-align: right; }
 .col-amount { width: 13%; text-align: right; }
 
 .item-desc-text {
