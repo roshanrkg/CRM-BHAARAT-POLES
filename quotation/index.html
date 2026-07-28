@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAH ENTERPRISE - Tax Invoice Generator</title>
+    <title>SAH ENTERPRISE - Quotation Generator</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,30 +20,29 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="invoice.css">
 </head>
 <body>
 
     <!-- Main Navigation Bar -->
     <header class="app-header no-print">
-        <div class="header-brand">
-            <div class="logo-badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981;"><i data-lucide="receipt"></i></div>
+        <a href="../" class="header-brand" style="text-decoration: none; color: inherit;">
+            <div class="logo-badge"><i data-lucide="file-text"></i></div>
             <div>
                 <h1>SAH ENTERPRISE</h1>
-                <span class="sub-title">Tax Invoice Generator</span>
+                <span class="sub-title">Quotation & Invoice Suite</span>
             </div>
-        </div>
+        </a>
         <div class="header-actions">
-            <a href="index.html" class="btn btn-outline" style="border-color: #38bdf8; color: #38bdf8;" title="Switch to Quotation Generator">
-                <i data-lucide="file-text"></i> Quotation Mode
+            <a href="../invoice/" class="btn btn-outline" style="border-color: #0284c7; color: #38bdf8; background: rgba(2, 132, 199, 0.1);" title="Switch to Tax Invoice Generator">
+                <i data-lucide="receipt"></i> Tax Invoice Mode
             </a>
-            <button class="btn btn-outline" id="btnLoadSample" title="Load Sample Invoice Data">
+            <button class="btn btn-outline" id="btnLoadSample" title="Load Sample Quotation Data">
                 <i data-lucide="sparkles"></i> Load Sample Data
             </button>
             <button class="btn btn-outline" id="btnReset" title="Clear all fields">
                 <i data-lucide="rotate-ccw"></i> Reset
             </button>
-            <button class="btn btn-outline" id="btnHistory" title="View Saved Invoices">
+            <button class="btn btn-outline" id="btnHistory" title="View Saved Quotations">
                 <i data-lucide="history"></i> History (<span id="historyCount">0</span>)
             </button>
             <div class="divider-v"></div>
@@ -56,7 +55,7 @@
         </div>
     </header>
 
-    <!-- Mobile Navigation Tab Bar -->
+    <!-- Mobile Navigation Tab Bar (Visible only on mobile/small screens) -->
     <div class="mobile-tab-bar no-print">
         <button class="mobile-tab active" id="tabEditor">
             <i data-lucide="edit-3"></i> Form Editor
@@ -77,19 +76,19 @@
 
                 <!-- 1. Quick Catalog Selector -->
                 <details class="accordion-item" open>
-                    <summary class="accordion-header" style="background-color: rgba(16, 185, 129, 0.1);">
-                        <span style="color: #10b981;"><i data-lucide="package-plus"></i> Quick Product Preset Catalog</span>
+                    <summary class="accordion-header" style="background-color: rgba(56, 189, 248, 0.1);">
+                        <span style="color: #38bdf8;"><i data-lucide="package-plus"></i> Quick Product Preset Catalog</span>
                         <i data-lucide="chevron-down" class="chevron"></i>
                     </summary>
                     <div class="accordion-content">
                         <div class="form-group row-group">
                             <select id="presetSelect" class="form-control">
                                 <option value="">-- Choose Common Pole / Hardware Preset --</option>
-                                <option value="preset_1">5 mtr MS garden pole, single arm</option>
-                                <option value="preset_2">3m Designer Garden Light Pole (J-Shaped)</option>
-                                <option value="preset_3">M16 Foundation Bolts (Set of 4)</option>
-                                <option value="preset_4">6m Octagonal Pole with Base Plate</option>
-                                <option value="preset_5">9m Swaged Tubular Steel Pole</option>
+                                <option value="preset_1">3m Designer Garden Light Pole (J-Shaped)</option>
+                                <option value="preset_2">M16 Foundation Bolts (Set of 4)</option>
+                                <option value="preset_3">6m Octagonal Pole with Base Plate</option>
+                                <option value="preset_4">9m Swaged Tubular Steel Pole</option>
+                                <option value="preset_5">LED Street Light Arm Bracket (Single)</option>
                             </select>
                             <button class="btn btn-secondary" id="btnAddPreset">Insert</button>
                         </div>
@@ -130,17 +129,17 @@
                     </div>
                 </details>
 
-                <!-- 3. Invoice Metadata & Dispatch -->
+                <!-- 1. Quotation Metadata -->
                 <details class="accordion-item" open>
                     <summary class="accordion-header">
-                        <span><i data-lucide="hash"></i> Tax Invoice Info & Vehicle</span>
+                        <span><i data-lucide="hash"></i> Quotation Info & Dispatch</span>
                         <i data-lucide="chevron-down" class="chevron"></i>
                     </summary>
                     <div class="accordion-content">
                         <div class="form-grid">
                             <div class="form-group">
-                                <label>Invoice No.</label>
-                                <input type="text" id="invoiceNo" class="form-control" value="SE-04/26-27">
+                                <label>Invoice / Quotation No.</label>
+                                <input type="text" id="invoiceNo" class="form-control" value="QN-23/26-27">
                             </div>
                             <div class="form-group">
                                 <label>Date</label>
@@ -148,11 +147,11 @@
                             </div>
                             <div class="form-group">
                                 <label>Delivery Note</label>
-                                <input type="text" id="deliveryNote" class="form-control" placeholder="Optional">
+                                <input type="text" id="deliveryNote" class="form-control" placeholder="e.g. Immediate">
                             </div>
                             <div class="form-group">
                                 <label>Mode of Payment</label>
-                                <input type="text" id="modeOfPayment" class="form-control" value="Online">
+                                <input type="text" id="modeOfPayment" class="form-control" placeholder="e.g. Bank Transfer / Advance">
                             </div>
                             <div class="form-group">
                                 <label>Buyer's Order No.</label>
@@ -172,26 +171,22 @@
                             </div>
                             <div class="form-group">
                                 <label>Dispatch Through</label>
-                                <input type="text" id="dispatchThrough" class="form-control" value="Roadways">
+                                <input type="text" id="dispatchThrough" class="form-control" value="Roadways/Logistics">
                             </div>
                             <div class="form-group">
                                 <label>Destination</label>
-                                <input type="text" id="destination" class="form-control" value="Maa Kalyaneshwari Mandir, Maithon.">
-                            </div>
-                            <div class="form-group full-width">
-                                <label>Vehicle Number</label>
-                                <input type="text" id="vehicleNo" class="form-control" value="WB 37C 1216" placeholder="e.g. WB 37C 1216">
+                                <input type="text" id="destination" class="form-control" value="Dhanbad, Jharkhand.">
                             </div>
                             <div class="form-group full-width">
                                 <label>Terms of Delivery</label>
-                                <input type="text" id="termsOfDelivery" class="form-control" placeholder="Optional">
+                                <input type="text" id="termsOfDelivery" class="form-control" placeholder="e.g. Ex-Works Asansol Factory">
                             </div>
                         </div>
                     </div>
                 </details>
 
-                <!-- 4. Buyer Details -->
-                <details class="accordion-item" open>
+                <!-- 2. Buyer Details -->
+                <details class="accordion-item">
                     <summary class="accordion-header">
                         <span><i data-lucide="user"></i> Buyer / Customer Details</span>
                         <i data-lucide="chevron-down" class="chevron"></i>
@@ -199,28 +194,24 @@
                     <div class="accordion-content">
                         <div class="form-group">
                             <label>Customer / Company Name</label>
-                            <input type="text" id="buyerName" class="form-control" value="SIRAJUDDIN ANSARI">
+                            <input type="text" id="buyerName" class="form-control" value="Samay Homes Pvt. Ltd.">
                         </div>
                         <div class="form-group">
                             <label>Address Line 1</label>
-                            <input type="text" id="buyerAddress1" class="form-control" value="NA, Gopalpur, Benagorai">
+                            <input type="text" id="buyerAddress1" class="form-control" value="Beside Zudio showroom, Adityapur">
                         </div>
                         <div class="form-group">
                             <label>Address Line 2</label>
-                            <input type="text" id="buyerAddress2" class="form-control" value="Nirsa, Dhanbad">
+                            <input type="text" id="buyerAddress2" class="form-control" value="Kandra Main Road, Jamshedpur.">
                         </div>
                         <div class="form-group">
                             <label>State & Pincode</label>
-                            <input type="text" id="buyerStatePin" class="form-control" value="Jharkhand- 828205">
-                        </div>
-                        <div class="form-group">
-                            <label>Buyer GST Number</label>
-                            <input type="text" id="buyerGst" class="form-control" value="20AGQPA2464E1ZX" placeholder="e.g. 20AGQPA2464E1ZX">
+                            <input type="text" id="buyerStatePin" class="form-control" value="Jharkhand- 831013">
                         </div>
                     </div>
                 </details>
 
-                <!-- 5. Line Items -->
+                <!-- 3. Line Items -->
                 <details class="accordion-item">
                     <summary class="accordion-header">
                         <span><i data-lucide="shopping-bag"></i> Product Line Items</span>
@@ -236,17 +227,17 @@
                     </div>
                 </details>
 
-                <!-- 6. Tax & Summary Options -->
+                <!-- 4. Tax & Summary Options -->
                 <details class="accordion-item">
                     <summary class="accordion-header">
-                        <span><i data-lucide="percent"></i> Tax Configuration</span>
+                        <span><i data-lucide="percent"></i> Tax Configuration & Options</span>
                         <i data-lucide="chevron-down" class="chevron"></i>
                     </summary>
                     <div class="accordion-content">
                         <div class="form-group">
                             <label>GST Tax Calculation Mode</label>
                             <select id="taxMode" class="form-control">
-                                <option value="igst18" selected>IGST 18% (Inter-State e.g. Jharkhand)</option>
+                                <option value="igst18" selected>IGST 18% (Inter-State e.g. Jharkhand/Bihar)</option>
                                 <option value="cgst_sgst9">CGST 9% + SGST 9% (Intra-State West Bengal)</option>
                                 <option value="exempt">Tax Exempt / Zero Tax</option>
                                 <option value="custom">Custom Percentage</option>
@@ -260,35 +251,16 @@
                             <label>Transportation / Freight Charges (₹)</label>
                             <input type="number" id="transportationFee" class="form-control" value="0" placeholder="e.g. 1500" step="0.01">
                         </div>
-                    </div>
-                </details>
-
-                <!-- 7. Signature Stamp Controls -->
-                <details class="accordion-item">
-                    <summary class="accordion-header" style="background-color: rgba(245, 158, 11, 0.1);">
-                        <span style="color: #f59e0b;"><i data-lucide="stamp"></i> Signature Stamp & Designation</span>
-                        <i data-lucide="chevron-down" class="chevron"></i>
-                    </summary>
-                    <div class="accordion-content">
                         <div class="form-group">
-                            <label>Include Signature Stamp</label>
-                            <select id="selectShowStamp" class="form-control">
-                                <option value="yes" selected>Yes - Show Signature Stamp Overlay</option>
-                                <option value="no">No - Signature Line Only</option>
+                            <label>Amount in Words Format</label>
+                            <select id="currencyFormat" class="form-control">
+                                <option value="INR">Indian Currency (Rupees ... Only)</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label>Signatory Title</label>
-                            <input type="text" id="sigTitle" class="form-control" value="Authorized Signatory">
-                        </div>
-                        <div class="form-group">
-                            <label>Signatory Designation</label>
-                            <input type="text" id="sigDesignation" class="form-control" value="Proprietor">
-                        </div>
                     </div>
                 </details>
 
-                <!-- 8. Remarks & Bank Details -->
+                <!-- 5. Remarks & Bank Details -->
                 <details class="accordion-item">
                     <summary class="accordion-header">
                         <span><i data-lucide="landmark"></i> Remarks & Bank Details</span>
@@ -297,16 +269,16 @@
                     <div class="accordion-content">
                         <div class="form-group">
                             <label>Remark Line 1</label>
-                            <input type="text" id="remark1" class="form-control" value="50% for booking and 100% payment before material dispatch.">
+                            <input type="text" id="remark1" class="form-control" value="50% payment as advance and 100% payment before material dispatch.">
                         </div>
                         <div class="form-group">
                             <label>Remark Line 2</label>
-                            <input type="text" id="remark2" class="form-control" value="Transportation will be done by us and the fare will be borne by the buyer.">
+                            <input type="text" id="remark2" class="form-control" value="Transportation as per actual. Borne by the buyer.">
                         </div>
                         <hr class="form-divider">
                         <div class="form-group">
                             <label>Bank Name</label>
-                            <input type="text" id="bankName" class="form-control" value="Punjab National Bank">
+                            <input type="text" id="bankName" class="form-control" value="Punjab National Bank.">
                         </div>
                         <div class="form-group">
                             <label>Account Number</label>
@@ -335,10 +307,9 @@
                     
                     <!-- Title Header -->
                     <div class="doc-title-container">
-                        <h2 class="doc-title">TAX INVOICE</h2>
+                        <h2 class="doc-title">QUOTATION</h2>
                     </div>
-                    <br>
-
+<br>
                     <!-- Outer Document Table Grid -->
                     <div class="grid-table-container">
                         
@@ -355,11 +326,10 @@
                                 <div class="buyer-box">
                                     <div class="box-label">Buyer Details:</div>
                                     <div class="buyer-details-body">
-                                        <p class="buyer-name" id="viewBuyerName">SIRAJUDDIN ANSARI</p>
-                                        <p class="buyer-address" id="viewBuyerAddr1">NA, Gopalpur, Benagorai</p>
-                                        <p class="buyer-address" id="viewBuyerAddr2">Nirsa, Dhanbad</p>
-                                        <p class="buyer-address" id="viewBuyerStatePin">Jharkhand- 828205</p>
-                                        <p class="buyer-gst-display" id="viewBuyerGstBox">GST NO. <strong id="viewBuyerGstVal">20AGQPA2464E1ZX</strong></p>
+                                        <p class="buyer-name" id="viewBuyerName">Samay Homes Pvt. Ltd.</p>
+                                        <p class="buyer-address" id="viewBuyerAddr1">Beside Zudio showroom, Adityapur</p>
+                                        <p class="buyer-address" id="viewBuyerAddr2">Kandra Main Road, Jamshedpur.</p>
+                                        <p class="buyer-address" id="viewBuyerStatePin">Jharkhand- 831013</p>
                                     </div>
                                 </div>
                             </div>
@@ -368,12 +338,12 @@
                             <div class="header-right-cell">
                                 <table class="meta-subtable">
                                     <tr>
-                                        <td><strong>Invoice no.</strong> <span id="viewInvoiceNo">SE-04/26-27</span></td>
-                                        <td><strong>Date:</strong> <span id="viewInvoiceDate">11/06/2026</span></td>
+                                        <td><strong>Invoice no.</strong> <span id="viewInvoiceNo">QN-23/26-27</span></td>
+                                        <td><strong>Date:</strong> <span id="viewInvoiceDate">26/07/2026</span></td>
                                     </tr>
                                     <tr>
                                         <td><strong>Delivery Note</strong> <span id="viewDeliveryNote"></span></td>
-                                        <td><strong>Mode of Payment:</strong> <span id="viewModeOfPayment">Online</span></td>
+                                        <td><strong>Mode of Payment:</strong> <span id="viewModeOfPayment"></span></td>
                                     </tr>
                                     <tr>
                                         <td>
@@ -394,13 +364,10 @@
                                         <td><strong>Dated</strong> <span id="viewDispatchDocDate"></span></td>
                                     </tr>
                                     <tr>
-                                        <td><strong>Dispatch through</strong><br><strong id="viewDispatchThrough">Roadways</strong></td>
-                                        <td><strong>Destination</strong><br><span id="viewDestination">Maa Kalyaneshwari Mandir, Maithon.</span></td>
+                                        <td><strong>Dispatch through</strong><br><strong id="viewDispatchThrough">Roadways/Logistics</strong></td>
+                                        <td><strong>Destination</strong><br><span id="viewDestination">Dhanbad, Jharkhand.</span></td>
                                     </tr>
-                                    <tr id="viewVehicleRow">
-                                        <td colspan="2"><strong>Vehicle Number:</strong> <span id="viewVehicleNo">WB 37C 1216</span></td>
-                                    </tr>
-                                    <tr id="viewTermsRow">
+                                    <tr>
                                         <td colspan="2"><strong>Terms of delivery</strong> <span id="viewTermsOfDelivery"></span></td>
                                     </tr>
                                 </table>
@@ -467,13 +434,13 @@
                             <div class="remarks-cell">
                                 <p class="section-heading">Remarks:</p>
                                 <ul class="remarks-list" id="viewRemarksList">
-                                    <li>50% for booking and 100% payment before material dispatch.</li>
-                                    <li>Transportation will be done by us and the fare will be borne by the buyer.</li>
+                                    <li>50% payment as advance and 100% payment before material dispatch.</li>
+                                    <li>Transportation as per actual. Borne by the buyer.</li>
                                 </ul>
                             </div>
                             <div class="bank-cell">
                                 <p class="section-heading">Company Bank Details</p>
-                                <p>Bank name: <strong id="viewBankName">Punjab National Bank</strong></p>
+                                <p>Bank name: <strong id="viewBankName">Punjab National Bank.</strong></p>
                                 <p>A/C No.: <strong id="viewBankAccount">1397202100001251</strong></p>
                                 <p>Branch & IFSC Code: <span id="viewBankBranchIfsc">SB Gorai Road Branch</span></p>
                                 <p class="ifsc-code" id="viewBankIfscCode">PUNB0139720</p>
@@ -482,15 +449,12 @@
 
                         <!-- Signature Section -->
                         <div class="signature-section">
-                            <div class="stamp-container" id="viewStampContainer">
-                                <img src="signature stamp.png" alt="Signature Stamp" class="stamp-image" id="viewStampImage">
-                            </div>
                             <div class="sig-space"></div>
                             <div class="sig-block">
-                                <p class="sig-company" id="viewSigCompany">For Sah Enterprise</p>
-                                <p class="sig-title" id="viewSigTitle">Authorized Signatory</p>
-                                <p class="sig-designation" id="viewSigDesignation">Proprietor</p>
+                                <p class="sig-company">For Sah Enterprise</p>
+                                <p class="sig-title">Authorized Signatory</p>
                             </div>
+                           
                         </div>
 
                     </div> <!-- /grid-table-container -->
@@ -505,11 +469,11 @@
     <div id="historyModal" class="modal-backdrop no-print hidden">
         <div class="modal-box">
             <div class="modal-header">
-                <h3><i data-lucide="history"></i> Saved Tax Invoice History</h3>
+                <h3><i data-lucide="history"></i> Saved Quotation History</h3>
                 <button class="btn-close" id="btnCloseHistory">&times;</button>
             </div>
             <div class="modal-body" id="historyList">
-                <p class="text-muted">No saved invoices yet. Click "Save Invoice" to store drafts locally.</p>
+                <p class="text-muted">No saved quotations yet. Click "Save Quotation" to store drafts locally.</p>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" id="btnClearHistory">Clear All History</button>
@@ -517,8 +481,8 @@
         </div>
     </div>
 
-    <!-- Application Script for Tax Invoice -->
-    <script src="invoice.js"></script>
+    <!-- Application Script -->
+    <script src="app.js"></script>
 
 </body>
 </html>

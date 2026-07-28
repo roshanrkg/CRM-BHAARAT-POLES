@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAH ENTERPRISE - Tax Invoice Generator</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Dependencies for Client-Side DOCX & PDF Exports -->
+    <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="invoice.css">
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header class="app-header no-print">
+        <a href="../" class="header-brand" style="text-decoration: none; color: inherit;">
+            <div class="logo-badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981;"><i data-lucide="receipt"></i></div>
+            <div>
+                <h1>SAH ENTERPRISE</h1>
+                <span class="sub-title">Tax Invoice Generator</span>
+            </div>
+        </a>
+        <div class="header-actions">
+            <a href="../quotation/" class="btn btn-outline" style="border-color: #38bdf8; color: #38bdf8;" title="Switch to Quotation Generator">
+                <i data-lucide="file-text"></i> Quotation Mode
+            </a>
+            <button class="btn btn-outline" id="btnLoadSample" title="Load Sample Invoice Data">
+                <i data-lucide="sparkles"></i> Load Sample Data
+            </button>
+            <button class="btn btn-outline" id="btnReset" title="Clear all fields">
+                <i data-lucide="rotate-ccw"></i> Reset
+            </button>
+            <button class="btn btn-outline" id="btnHistory" title="View Saved Invoices">
+                <i data-lucide="history"></i> History (<span id="historyCount">0</span>)
+            </button>
+            <div class="divider-v"></div>
+            <button class="btn btn-docx" id="btnExportDocx">
+                <i data-lucide="file-type-2"></i> Download Word (.docx)
+            </button>
+            <button class="btn btn-primary" id="btnPrintPdf">
+                <i data-lucide="printer"></i> Download / Print PDF
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation Tab Bar -->
+    <div class="mobile-tab-bar no-print">
+        <button class="mobile-tab active" id="tabEditor">
+            <i data-lucide="edit-3"></i> Form Editor
+        </button>
+        <button class="mobile-tab" id="tabPreview">
+            <i data-lucide="eye"></i> Live A4 Preview
+        </button>
+    </div>
+
+    <!-- App Container -->
+    <div class="app-container">
+        
+        <!-- Left Sidebar: Controls & Form Inputs -->
+        <aside class="sidebar no-print">
+            
+            <!-- Accordion / Form Sections -->
+            <div class="accordion-container">
+
+                <!-- 1. Quick Catalog Selector -->
+                <details class="accordion-item" open>
+                    <summary class="accordion-header" style="background-color: rgba(16, 185, 129, 0.1);">
+                        <span style="color: #10b981;"><i data-lucide="package-plus"></i> Quick Product Preset Catalog</span>
+                        <i data-lucide="chevron-down" class="chevron"></i>
+                    </summary>
+                    <div class="accordion-content">
+                        <div class="form-group row-group">
+                            <select id="presetSelect" class="form-control">
+                                <option value="">-- Choose Common Pole / Hardware Preset --</option>
+                                <option value="preset_1">5 mtr MS garden pole, single arm</option>
+                                <option value="preset_2">3m Designer Garden Light Pole (J-Shaped)</option>
+                                <option value="preset_3">M16 Foundation Bolts (Set of 4)</option>
+                                <option value="preset_4">6m Octagonal Pole with Base Plate</option>
+                                <option value="preset_5">9m Swaged Tubular Steel Pole</option>
+                            </select>
+                            <button class="btn btn-secondary" id="btnAddPreset">Insert</button>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- 2. Seller / Company Info -->
+                <details class="accordion-item">
+                    <summary class="accordion-header">
+                        <span><i data-lucide="building"></i> Seller / Company Info</span>
+                        <i data-lucide="chevron-down" class="chevron"></i>
+                    </summary>
+                    <div class="accordion-content">
+                        <div class="form-group">
+                            <label>Company Name</label>
+                            <input type="text" id="sellerName" class="form-control" value="SAH ENTERPRISE">
+                        </div>
+                        <div class="form-group">
+                            <label>Address Line 1</label>
+                            <input type="text" id="sellerAddr1" class="form-control" value="Holding no. 303, R.K. Roy Road Vivekananda Pally,">
+                        </div>
+                        <div class="form-group">
+                            <label>Address Line 2</label>
+                            <input type="text" id="sellerAddr2" class="form-control" value="Ismile. Asansol- 713301">
+                        </div>
+                        <div class="form-group">
+                            <label>GST Number</label>
+                            <input type="text" id="sellerGst" class="form-control" value="19FMLPS0625H1ZO">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Numbers</label>
+                            <input type="text" id="sellerPhone" class="form-control" value="9832713026/9064441273">
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="text" id="sellerEmail" class="form-control" value="bhaarat.poles@gmail.com">
+                        </div>
+                    </div>
+                </details>
+
+                <!-- 3. Invoice Metadata & Dispatch -->
+                <details class="accordion-item" open>
+                    <summary class="accordion-header">
+                        <span><i data-lucide="hash"></i> Tax Invoice Info & Vehicle</span>
+                        <i data-lucide="chevron-down" class="chevron"></i>
+                    </summary>
+                    <div class="accordion-content">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Invoice No.</label>
+                                <input type="text" id="invoiceNo" class="form-control" value="SE-04/26-27">
+                            </div>
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="date" id="invoiceDate" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Delivery Note</label>
+                                <input type="text" id="deliveryNote" class="form-control" placeholder="Optional">
+                            </div>
+                            <div class="form-group">
+                                <label>Mode of Payment</label>
+                                <input type="text" id="modeOfPayment" class="form-control" value="Online">
+                            </div>
+                            <div class="form-group">
+                                <label>Buyer's Order No.</label>
+                                <input type="text" id="buyerOrderNo" class="form-control" placeholder="Optional">
+                            </div>
+                            <div class="form-group">
+                                <label>Buyer Order Date</label>
+                                <input type="date" id="buyerOrderDate" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Dispatch Doc No.</label>
+                                <input type="text" id="dispatchDocNo" class="form-control" placeholder="Optional">
+                            </div>
+                            <div class="form-group">
+                                <label>Dispatch Doc Date</label>
+                                <input type="date" id="dispatchDocDate" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Dispatch Through</label>
+                                <input type="text" id="dispatchThrough" class="form-control" value="Roadways">
+                            </div>
+                            <div class="form-group">
+                                <label>Destination</label>
+                                <input type="text" id="destination" class="form-control" value="Maa Kalyaneshwari Mandir, Maithon.">
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Vehicle Number</label>
+                                <input type="text" id="vehicleNo" class="form-control" value="WB 37C 1216" placeholder="e.g. WB 37C 1216">
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Terms of Delivery</label>
+                                <input type="text" id="termsOfDelivery" class="form-control" placeholder="Optional">
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- 4. Buyer Details -->
+                <details class="accordion-item" open>
+                    <summary class="accordion-header">
+                        <span><i data-lucide="user"></i> Buyer / Customer Details</span>
+                        <i data-lucide="chevron-down" class="chevron"></i>
+                    </summary>
+                    <div class="accordion-content">
+                        <div class="form-group">
+                            <label>Customer / Company Name</label>
+                            <input type="text" id="buyerName" class="form-control" value="SIRAJUDDIN ANSARI">
+                        </div>
+                        <div class="form-group">
+                            <label>Address Line 1</label>
+                            <input type="text" id="buyerAddress1" class="form-control" value="NA, Gopalpur, Benagorai">
+                        </div>
+                        <div class="form-group">
+                            <label>Address Line 2</label>
+                            <input type="text" id="buyerAddress2" class="form-control" value="Nirsa, Dhanbad">
+                        </div>
+                        <div class="form-group">
+                            <label>State & Pincode</label>
+                            <input type="text" id="buyerStatePin" class="form-control" value="Jharkhand- 828205">
+                        </div>
+                        <div class="form-group">
+                            <label>Buyer GST Number</label>
+                            <input type="text" id="buyerGst" class="form-control" value="20AGQPA2464E1ZX" placeholder="e.g. 20AGQPA2464E1ZX">
+                        </div>
+                    </div>
+                </details>
+
+                <!-- 5. Line Items -->
+                <details class="accordion-item">
+                    <summary class="accordion-header">
+                        <span><i data-lucide="shopping-bag"></i> Product Line Items</span>
+                        <i data-lucide="chevron-down" class="chevron"></i>
+                    </summary>
+                    <div class="accordion-content">
+                        <div id="itemsContainer" class="items-editor">
+                            <!-- Dynamic Item Rows injected here -->
+                        </div>
+                        <button class="btn btn-outline btn-full mt-2" id="btnAddItem">
+                            <i data-lucide="plus-circle"></i> Add Custom Line Item
+                        </button>
+                    </div>
+                </details>
+
+                <!-- 6. Tax & Summary Options -->
+                <details class="accordion-item">
+                    <summary class="accordion-header">
+                        <span><i data-lucide="percent"></i> Tax Configuration</span>
+                        <i data-lucide="chevron-down" class="chevron"></i>
+                    </summary>
+                    <div class="accordion-content">
+                        <div class="form-group">
+                            <label>GST Tax Calculation Mode</label>
+                            <select id="taxMode" class="form-control">
+                                <option value="igst18" selected>IGST 18% (Inter-State e.g. Jharkhand)</option>
+                                <option value="cgst_sgst9">CGST 9% + SGST 9% (Intra-State West Bengal)</option>
+                                <option value="exempt">Tax Exempt / Zero Tax</option>
+                                <option value="custom">Custom Percentage</option>
+                            </select>
+                        </div>
+                        <div id="customTaxRow" class="form-group hidden">
+                            <label>Custom Tax Rate (%)</label>
+                            <input type="number" id="customTaxRate" class="form-control" value="18" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label>Transportation / Freight Charges (₹)</label>
+                            <input type="number" id="transportationFee" class="form-control" value="0" placeholder="e.g. 1500" step="0.01">
+                        </div>
+                    </div>
+                </details>
+
+                <!-- 7. Signature Stamp Controls -->
+                <details class="accordion-item">
+                    <summary class="accordion-header" style="background-color: rgba(245, 158, 11, 0.1);">
+                        <span style="color: #f59e0b;"><i data-lucide="stamp"></i> Signature Stamp & Designation</span>
+                        <i data-lucide="chevron-down" class="chevron"></i>
+                    </summary>
+                    <div class="accordion-content">
+                        <div class="form-group">
+                            <label>Include Signature Stamp</label>
+                            <select id="selectShowStamp" class="form-control">
+                                <option value="yes" selected>Yes - Show Signature Stamp Overlay</option>
+                                <option value="no">No - Signature Line Only</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Signatory Title</label>
+                            <input type="text" id="sigTitle" class="form-control" value="Authorized Signatory">
+                        </div>
+                        <div class="form-group">
+                            <label>Signatory Designation</label>
+                            <input type="text" id="sigDesignation" class="form-control" value="Proprietor">
+                        </div>
+                    </div>
+                </details>
+
+                <!-- 8. Remarks & Bank Details -->
+                <details class="accordion-item">
+                    <summary class="accordion-header">
+                        <span><i data-lucide="landmark"></i> Remarks & Bank Details</span>
+                        <i data-lucide="chevron-down" class="chevron"></i>
+                    </summary>
+                    <div class="accordion-content">
+                        <div class="form-group">
+                            <label>Remark Line 1</label>
+                            <input type="text" id="remark1" class="form-control" value="50% for booking and 100% payment before material dispatch.">
+                        </div>
+                        <div class="form-group">
+                            <label>Remark Line 2</label>
+                            <input type="text" id="remark2" class="form-control" value="Transportation will be done by us and the fare will be borne by the buyer.">
+                        </div>
+                        <hr class="form-divider">
+                        <div class="form-group">
+                            <label>Bank Name</label>
+                            <input type="text" id="bankName" class="form-control" value="Punjab National Bank">
+                        </div>
+                        <div class="form-group">
+                            <label>Account Number</label>
+                            <input type="text" id="bankAccount" class="form-control" value="1397202100001251">
+                        </div>
+                        <div class="form-group">
+                            <label>Branch & IFSC Code</label>
+                            <input type="text" id="bankBranchIfsc" class="form-control" value="SB Gorai Road Branch">
+                        </div>
+                        <div class="form-group">
+                            <label>IFSC / PUNB Code</label>
+                            <input type="text" id="bankIfscCode" class="form-control" value="PUNB0139720">
+                        </div>
+                    </div>
+                </details>
+
+            </div>
+
+        </aside>
+
+        <!-- Right Main View: Printable Live A4 Preview -->
+        <main class="preview-viewport">
+            
+            <div class="sheet-wrapper">
+                <div id="quotationSheet" class="quotation-sheet">
+                    
+                    <!-- Title Header -->
+                    <div class="doc-title-container">
+                        <h2 class="doc-title">TAX INVOICE</h2>
+                    </div>
+                    <br>
+
+                    <!-- Outer Document Table Grid -->
+                    <div class="grid-table-container">
+                        
+                        <!-- Top Header Section (Seller Left / Meta Grid Right) -->
+                        <div class="header-grid-row">
+                            
+                            <!-- Left: Seller Info & Buyer Details -->
+                            <div class="header-left-cell">
+                                <div class="company-brand">
+                                    <h1 class="company-name" id="viewSellerName">SAH ENTERPRISE</h1>
+                                    <p class="company-address"><span id="viewSellerAddr1">Holding no. 303, R.K. Roy Road Vivekananda Pally,</span><br><span id="viewSellerAddr2">Ismile. Asansol- 713301</span></p>
+                                    <p class="company-gst">GST NO. <span id="viewGstNo">19FMLPS0625H1ZO</span></p>
+                                </div>
+                                <div class="buyer-box">
+                                    <div class="box-label">Buyer Details:</div>
+                                    <div class="buyer-details-body">
+                                        <p class="buyer-name" id="viewBuyerName">SIRAJUDDIN ANSARI</p>
+                                        <p class="buyer-address" id="viewBuyerAddr1">NA, Gopalpur, Benagorai</p>
+                                        <p class="buyer-address" id="viewBuyerAddr2">Nirsa, Dhanbad</p>
+                                        <p class="buyer-address" id="viewBuyerStatePin">Jharkhand- 828205</p>
+                                        <p class="buyer-gst-display" id="viewBuyerGstBox">GST NO. <strong id="viewBuyerGstVal">20AGQPA2464E1ZX</strong></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right: Key-Value Metadata Grid Table -->
+                            <div class="header-right-cell">
+                                <table class="meta-subtable">
+                                    <tr>
+                                        <td><strong>Invoice no.</strong> <span id="viewInvoiceNo">SE-04/26-27</span></td>
+                                        <td><strong>Date:</strong> <span id="viewInvoiceDate">11/06/2026</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Delivery Note</strong> <span id="viewDeliveryNote"></span></td>
+                                        <td><strong>Mode of Payment:</strong> <span id="viewModeOfPayment">Online</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <strong>Phone no.:</strong><br>
+                                            <span class="meta-highlight" id="viewSellerPhone">9832713026/9064441273</span>
+                                        </td>
+                                        <td>
+                                            <strong>E-mail:</strong><br>
+                                            <span class="meta-email" id="viewSellerEmail">bhaarat.poles@gmail.com</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Buyer's Order No.</strong> <span id="viewBuyerOrderNo"></span></td>
+                                        <td><strong>Dated</strong> <span id="viewBuyerOrderDate"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Dispatch Document No.</strong> <span id="viewDispatchDocNo"></span></td>
+                                        <td><strong>Dated</strong> <span id="viewDispatchDocDate"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Dispatch through</strong><br><strong id="viewDispatchThrough">Roadways</strong></td>
+                                        <td><strong>Destination</strong><br><span id="viewDestination">Maa Kalyaneshwari Mandir, Maithon.</span></td>
+                                    </tr>
+                                    <tr id="viewVehicleRow">
+                                        <td colspan="2"><strong>Vehicle Number:</strong> <span id="viewVehicleNo">WB 37C 1216</span></td>
+                                    </tr>
+                                    <tr id="viewTermsRow">
+                                        <td colspan="2"><strong>Terms of delivery</strong> <span id="viewTermsOfDelivery"></span></td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                        </div> <!-- /header-grid-row -->
+
+                        <!-- Main Line Items Table -->
+                        <table class="items-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-sl">Sl.<br>No.</th>
+                                    <th class="col-desc">Description of Goods</th>
+                                    <th class="col-hsn">HSN</th>
+                                    <th class="col-qty">Qty.</th>
+                                    <th class="col-rate">Rate</th>
+                                    <th class="col-amount">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="viewItemsTableBody">
+                                <!-- Rendered dynamically by JS -->
+                            </tbody>
+                            <tfoot>
+                                <!-- Subtotal -->
+                                <tr class="total-row">
+                                    <td colspan="5" class="text-right"><strong>Total:</strong></td>
+                                    <td class="text-right"><strong id="viewSubtotal">₹0.00</strong></td>
+                                </tr>
+                                <!-- CGST -->
+                                <tr id="rowCgst" class="tax-row">
+                                    <td colspan="5" class="text-right"><strong>CGST 9%:</strong></td>
+                                    <td class="text-right" id="viewCgst"></td>
+                                </tr>
+                                <!-- SGST -->
+                                <tr id="rowSgst" class="tax-row">
+                                    <td colspan="5" class="text-right"><strong>SGST 9%:</strong></td>
+                                    <td class="text-right" id="viewSgst"></td>
+                                </tr>
+                                <!-- IGST -->
+                                <tr id="rowIgst" class="tax-row">
+                                    <td colspan="5" class="text-right"><strong>IGST 18%:</strong></td>
+                                    <td class="text-right" id="viewIgst">₹0.00</td>
+                                </tr>
+                                <!-- Transportation Charges -->
+                                <tr id="rowTransportation" class="tax-row">
+                                    <td colspan="5" class="text-right"><strong>Transportation Charges:</strong></td>
+                                    <td class="text-right" id="viewTransportation">₹0.00</td>
+                                </tr>
+                                <!-- Grand Total -->
+                                <tr class="grand-total-row">
+                                    <td colspan="5" class="text-right"><strong>Grand Total</strong></td>
+                                    <td class="text-right"><strong id="viewGrandTotal">₹0.00</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <!-- Full Width Row: Amount in Words -->
+                        <div class="words-row">
+                            <strong>Amount In words:</strong> <span id="viewAmountInWords">Rupees Zero Only.</span>
+                        </div>
+
+                        <!-- Footer Grid: Split Box for Remarks & Bank Details -->
+                        <div class="footer-grid-row">
+                            <div class="remarks-cell">
+                                <p class="section-heading">Remarks:</p>
+                                <ul class="remarks-list" id="viewRemarksList">
+                                    <li>50% for booking and 100% payment before material dispatch.</li>
+                                    <li>Transportation will be done by us and the fare will be borne by the buyer.</li>
+                                </ul>
+                            </div>
+                            <div class="bank-cell">
+                                <p class="section-heading">Company Bank Details</p>
+                                <p>Bank name: <strong id="viewBankName">Punjab National Bank</strong></p>
+                                <p>A/C No.: <strong id="viewBankAccount">1397202100001251</strong></p>
+                                <p>Branch & IFSC Code: <span id="viewBankBranchIfsc">SB Gorai Road Branch</span></p>
+                                <p class="ifsc-code" id="viewBankIfscCode">PUNB0139720</p>
+                            </div>
+                        </div>
+
+                        <!-- Signature Section -->
+                        <div class="signature-section">
+                            <div class="stamp-container" id="viewStampContainer">
+                                <img src="signature stamp.png" alt="Signature Stamp" class="stamp-image" id="viewStampImage">
+                            </div>
+                            <div class="sig-space"></div>
+                            <div class="sig-block">
+                                <p class="sig-company" id="viewSigCompany">For Sah Enterprise</p>
+                                <p class="sig-title" id="viewSigTitle">Authorized Signatory</p>
+                                <p class="sig-designation" id="viewSigDesignation">Proprietor</p>
+                            </div>
+                        </div>
+
+                    </div> <!-- /grid-table-container -->
+
+                </div> <!-- /quotationSheet -->
+            </div>
+
+        </main>
+    </div>
+
+    <!-- History Drawer Modal -->
+    <div id="historyModal" class="modal-backdrop no-print hidden">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i data-lucide="history"></i> Saved Tax Invoice History</h3>
+                <button class="btn-close" id="btnCloseHistory">&times;</button>
+            </div>
+            <div class="modal-body" id="historyList">
+                <p class="text-muted">No saved invoices yet. Click "Save Invoice" to store drafts locally.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="btnClearHistory">Clear All History</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script for Tax Invoice -->
+    <script src="invoice.js"></script>
+
+</body>
+</html>
